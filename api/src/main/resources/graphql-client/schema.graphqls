@@ -1,0 +1,78 @@
+type Worker {
+    id: ID!
+    name: String!
+    description: String!
+}
+
+type Job {
+    id: ID!
+    cost: Int!
+    status: String!
+    workTime: String!
+    category: String!
+    finishRate: Float!
+    description: String!
+    worker: Worker!
+    endTimeStamp: String
+    startTimeStamp: String
+}
+
+type WorkerPage {
+    content: [Worker]!
+    pageNumber: Int!
+    pageSize: Int!
+    totalElements: Int!
+    totalPages: Int!
+    last: Boolean!
+}
+
+type JobPage {
+    content: [Job]!
+    pageNumber: Int!
+    pageSize: Int!
+    totalElements: Int!
+    totalPages: Int!
+    last: Boolean!
+}
+
+type Query {
+    workerById(id: ID!): Worker
+    workers(page: Int = 0, size: Int = 10): WorkerPage
+
+    jobById(id: ID!): Job
+    jobs(page: Int = 0, size: Int = 10): JobPage
+}
+
+input WorkerInput {
+    name: String!
+    description: String!
+}
+
+input UpdateWorkerInput {
+    name: String
+    description: String
+}
+
+input JobInput {
+    workerId: ID!
+    cost: Int!
+    time: String!
+    category: String!
+    description: String!
+}
+
+input UpdateJobInput {
+    workerId: ID
+    status: String
+    finishRate: Float
+}
+
+type Mutation {
+    createWorker(input: WorkerInput!): Worker
+    updateWorker(id: ID!, input: WorkerInput!): Worker
+    deleteWorker(id: ID!): ID
+
+    createJob(input: JobInput!): Job
+    updateJob(id: ID!, input: UpdateJobInput!): Job
+    deleteJob(id: ID!): ID
+}
