@@ -4,6 +4,11 @@ import org.example.api.dto.JobChangeRequest
 import org.example.api.dto.JobRequest
 import org.example.api.dto.JobResponse
 import org.example.api.dto.PagedResponse
+import org.example.event.JobEvent.JobCreatedEvent
+import org.example.event.JobEvent.JobDeletedEvent
+import org.example.event.RabbitMQ.EXCHANGE_NAME
+import org.example.event.RabbitMQ.Notification
+import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.stereotype.Service
 import kotlin.math.ceil
 import kotlin.math.min
@@ -20,6 +25,7 @@ interface JobService {
 @Service
 class JobServiceInMemory(
     private val workerService: WorkerService,
+    private val rabbitTemplate: RabbitTemplate,
 ) : JobService {
 
     private val data: MutableMap<Long, JobResponse> = mutableMapOf()
@@ -38,6 +44,13 @@ class JobServiceInMemory(
         startTimeStamp = null,
     ).also { job ->
         data[job.id] = job
+
+        val event = JobCreatedEvent(
+            jobId = job.id,
+            category = job.category,
+            description = job.description,
+        )
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, Notification.Job.Created.name, event)
     }
 
     override fun getJobById(id: Long): JobResponse = data.getValue(id)
@@ -80,5 +93,8 @@ class JobServiceInMemory(
 
     override fun deleteJob(id: Long) {
         data.remove(id)
+
+        val event = JobDeletedEvent(jobId = id)
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, Notification.Job.Deleted.name, event)
     }
 }

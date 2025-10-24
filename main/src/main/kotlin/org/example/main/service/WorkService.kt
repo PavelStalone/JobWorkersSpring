@@ -4,6 +4,10 @@ import org.example.api.dto.PagedResponse
 import org.example.api.dto.WorkerChangeRequest
 import org.example.api.dto.WorkerRequest
 import org.example.api.dto.WorkerResponse
+import org.example.event.RabbitMQ.EXCHANGE_NAME
+import org.example.event.RabbitMQ.Notification
+import org.example.event.WorkerEvent
+import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.stereotype.Service
 import kotlin.math.ceil
 import kotlin.math.min
@@ -18,7 +22,9 @@ interface WorkerService {
 }
 
 @Service
-class WorkServiceInMemory : WorkerService {
+class WorkServiceInMemory(
+    private val rabbitTemplate: RabbitTemplate,
+) : WorkerService {
 
     private val data: MutableMap<Long, WorkerResponse> = mutableMapOf()
     private var id = 0L
@@ -29,6 +35,13 @@ class WorkServiceInMemory : WorkerService {
         description = workerRequest.description,
     ).also { worker ->
         data[worker.id] = worker
+
+        val event = WorkerEvent.WorkerCreatedEvent(
+            workerId = worker.id,
+            name = worker.name,
+            description = worker.description,
+        )
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, Notification.Worker.Created.name, event)
     }
 
     override fun getWorkerById(id: Long): WorkerResponse = data.getValue(id)
@@ -70,5 +83,8 @@ class WorkServiceInMemory : WorkerService {
 
     override fun deleteWorker(id: Long) {
         data.remove(id)
+
+        val event = WorkerEvent.WorkerDeletedEvent(workerId = id)
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, Notification.Worker.Deleted.name, event)
     }
 }

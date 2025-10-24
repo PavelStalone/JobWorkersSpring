@@ -5,3 +5,5 @@ rootProject.name = "app"
 
 include(":main")
 include(":api")
+include(":event")
+include(":service:audit")
