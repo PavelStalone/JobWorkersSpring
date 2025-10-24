@@ -1,4 +1,4 @@
-package org.example.main.service
+package org.example.service.main.service
 
 import org.example.api.dto.JobChangeRequest
 import org.example.api.dto.JobRequest

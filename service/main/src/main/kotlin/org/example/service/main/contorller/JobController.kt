@@ -1,11 +1,11 @@
-package org.example.main.contorller
+package org.example.service.main.contorller
 
 import org.example.api.JobApi
 import org.example.api.dto.JobChangeRequest
 import org.example.api.dto.JobRequest
 import org.example.api.dto.JobResponse
-import org.example.main.assembler.JobModelAssembler
-import org.example.main.service.JobService
+import org.example.service.main.assembler.JobModelAssembler
+import org.example.service.main.service.JobService
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.web.PagedResourcesAssembler

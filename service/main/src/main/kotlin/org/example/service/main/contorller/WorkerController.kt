@@ -1,11 +1,11 @@
-package org.example.main.contorller
+package org.example.service.main.contorller
 
 import org.example.api.WorkerApi
 import org.example.api.dto.WorkerChangeRequest
 import org.example.api.dto.WorkerRequest
 import org.example.api.dto.WorkerResponse
-import org.example.main.assembler.WorkerModelAssembler
-import org.example.main.service.WorkerService
+import org.example.service.main.assembler.WorkerModelAssembler
+import org.example.service.main.service.WorkerService
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.web.PagedResourcesAssembler

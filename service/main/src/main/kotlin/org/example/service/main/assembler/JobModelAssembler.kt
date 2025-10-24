@@ -1,8 +1,8 @@
-package org.example.main.assembler
+package org.example.service.main.assembler
 
 import org.example.api.dto.JobResponse
-import org.example.main.contorller.JobController
-import org.example.main.contorller.WorkerController
+import org.example.service.main.contorller.JobController
+import org.example.service.main.contorller.WorkerController
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.hateoas.server.core.DummyInvocationUtils.methodOn

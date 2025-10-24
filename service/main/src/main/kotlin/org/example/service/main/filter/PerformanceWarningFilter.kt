@@ -1,4 +1,4 @@
-package org.example.main.filter
+package org.example.service.main.filter
 
 import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain

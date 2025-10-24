@@ -3,7 +3,7 @@ plugins {
 }
 rootProject.name = "app"
 
-include(":main")
+include(":service:main")
 include(":api")
 include(":event")
 include(":service:audit")

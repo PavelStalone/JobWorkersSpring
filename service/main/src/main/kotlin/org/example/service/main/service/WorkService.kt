@@ -1,4 +1,4 @@
-package org.example.main.service
+package org.example.service.main.service
 
 import org.example.api.dto.PagedResponse
 import org.example.api.dto.WorkerChangeRequest

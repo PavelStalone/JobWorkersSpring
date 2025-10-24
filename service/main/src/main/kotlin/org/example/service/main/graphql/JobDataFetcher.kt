@@ -1,11 +1,11 @@
-package org.example.main.graphql
+package org.example.service.main.graphql
 
 import com.netflix.graphql.dgs.*
 import graphql.schema.DataFetchingEnvironment
 import org.example.api.dto.JobChangeRequest
 import org.example.api.dto.JobRequest
 import org.example.api.dto.JobResponse
-import org.example.main.service.JobService
+import org.example.service.main.service.JobService
 
 @DgsComponent
 class JobDataFetcher(

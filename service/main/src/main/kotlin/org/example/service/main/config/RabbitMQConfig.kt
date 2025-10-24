@@ -1,4 +1,4 @@
-package org.example.main.config
+package org.example.service.main.config
 
 import org.example.event.RabbitMQ.EXCHANGE_NAME
 import org.springframework.amqp.core.TopicExchange

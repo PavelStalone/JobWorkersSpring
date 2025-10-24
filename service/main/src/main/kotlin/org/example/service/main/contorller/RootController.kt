@@ -1,4 +1,4 @@
-package org.example.main.contorller
+package org.example.service.main.contorller
 
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.RepresentationModel

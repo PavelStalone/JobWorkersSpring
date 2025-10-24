@@ -1,4 +1,4 @@
-package org.example.main.graphql
+package org.example.service.main.graphql
 
 import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsMutation
@@ -6,7 +6,7 @@ import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
 import org.example.api.dto.WorkerChangeRequest
 import org.example.api.dto.WorkerRequest
-import org.example.main.service.WorkerService
+import org.example.service.main.service.WorkerService
 
 @DgsComponent
 class WorkerDataFetcher(
