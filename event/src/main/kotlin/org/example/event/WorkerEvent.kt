@@ -11,4 +11,10 @@ sealed interface WorkerEvent : Event {
     data class WorkerDeletedEvent(
         val workerId: Long,
     ) : WorkerEvent
+
+    data class WorkerRatedEvent(
+        val workerId: Long,
+        val score: Int,
+        val verdict: String,
+    ): WorkerEvent
 }

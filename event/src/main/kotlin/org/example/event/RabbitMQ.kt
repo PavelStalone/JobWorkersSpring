@@ -3,6 +3,7 @@ package org.example.event
 object RabbitMQ {
 
     const val EXCHANGE_NAME = "repair-exchange"
+    const val FANOUT_EXCHANGE_NAME = "analytics-fanout"
     const val DL_EXCHANGE_NAME = "dl-exchange"
 
     const val ALL_WILDCARD = "#"

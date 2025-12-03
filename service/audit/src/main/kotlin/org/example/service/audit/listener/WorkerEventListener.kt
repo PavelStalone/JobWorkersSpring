@@ -1,9 +1,11 @@
 package org.example.service.audit.listener
 
 import com.rabbitmq.client.Channel
+import org.example.event.RabbitMQ
 import org.example.event.RabbitMQ.ALL_WILDCARD
 import org.example.event.RabbitMQ.DL_EXCHANGE_NAME
 import org.example.event.RabbitMQ.EXCHANGE_NAME
+import org.example.event.RabbitMQ.FANOUT_EXCHANGE_NAME
 import org.example.event.RabbitMQ.Notification
 import org.example.event.WorkerEvent
 import org.slf4j.LoggerFactory
@@ -76,6 +78,18 @@ class WorkerEventListener {
     )
     fun handleWorkerEvent(event: WorkerEvent) {
         LOG.info("Found general worker event: $event")
+    }
+
+    @RabbitListener(
+        bindings = [
+            QueueBinding(
+                value = Queue(name = "q.audit.analytic", durable = "true"),
+                exchange = Exchange(name = FANOUT_EXCHANGE_NAME, type = ExchangeTypes.FANOUT),
+            )
+        ]
+    )
+    fun handleRating(event: WorkerEvent.WorkerRatedEvent){
+        LOG.info("NOTIFY: Sending email. User ${event.workerId} has new rating: ${event.score}. [$event]")
     }
 
     companion object {

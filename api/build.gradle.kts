@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
     kotlin("jvm") version "2.2.0"
     kotlin("plugin.spring") version "1.9.25"
@@ -12,6 +14,13 @@ description = "Project for job control"
 
 repositories {
     mavenCentral()
+}
+
+tasks.getByName<BootJar>("bootJar") {
+    enabled = false
+}
+tasks.getByName("jar") {
+    enabled = true
 }
 
 kotlin {

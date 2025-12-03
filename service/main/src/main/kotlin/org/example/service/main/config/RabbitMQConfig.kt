@@ -1,6 +1,8 @@
 package org.example.service.main.config
 
 import org.example.event.RabbitMQ.EXCHANGE_NAME
+import org.example.event.RabbitMQ.FANOUT_EXCHANGE_NAME
+import org.springframework.amqp.core.FanoutExchange
 import org.springframework.amqp.core.TopicExchange
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
@@ -13,6 +15,9 @@ class RabbitMQConfig {
 
     @Bean
     fun repairExchange() = TopicExchange(EXCHANGE_NAME, true, false)
+
+    @Bean
+    fun fanoutExchange() = FanoutExchange(FANOUT_EXCHANGE_NAME, true, false)
 
     @Bean
     fun messageConverter() = SimpleMessageConverter().apply {

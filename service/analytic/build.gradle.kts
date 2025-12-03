@@ -7,8 +7,8 @@ plugins {
     id("com.google.protobuf") version "0.9.4"
 }
 
-group = "org.example.service.main"
-version = "1.0-SNAPSHOT"
+group = "org.example.service.analytic"
+version = "unspecified"
 
 repositories {
     mavenCentral()
@@ -18,23 +18,18 @@ kotlin {
     jvmToolchain(17)
 }
 
-extra["netflixDgsVersion"] = "10.2.1"
 extra["springGrpcVersion"] = "0.12.0"
 
 dependencyManagement {
     imports {
-        mavenBom("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:${property("netflixDgsVersion")}")
         mavenBom("org.springframework.grpc:spring-grpc-dependencies:${property("springGrpcVersion")}")
     }
 }
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
-    implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
 
-    implementation(project(":api"))
     implementation(project(":grpc"))
     implementation(project(":event"))
 }
