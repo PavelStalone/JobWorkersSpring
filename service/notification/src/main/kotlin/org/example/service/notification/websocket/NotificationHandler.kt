@@ -1,4 +1,4 @@
-package org.example.service.notification.handler
+package org.example.service.notification.websocket
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -9,33 +9,17 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
-class NotificationWebSocketHandler : TextWebSocketHandler() {
+class NotificationHandler : TextWebSocketHandler() {
 
-    private val sessions: MutableMap<String, WebSocketSession> = ConcurrentHashMap()
+    private val sessions: MutableSet<WebSocketSession> = ConcurrentHashMap.newKeySet()
 
     val activeConnections: Int
         get() = sessions.size
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
-        val userId = requireNotNull(session.uri?.query?.split("=")?.last())
+        sessions.add(session)
 
-        sessions[userId] = session
-
-        LOG.info("Новое подключение для пользователя $userId: id=${session.id}, всего активных: ${sessions.size}")
-    }
-
-    override fun handleTextMessage(
-        session: WebSocketSession,
-        message: TextMessage
-    ) {
-        val payload = message.payload
-
-        LOG.debug("Сообщение от ${session.id}: $payload")
-
-        if ("PING".equals(payload, true)) {
-            LOG.info("Отправлено PONG на ${session.id}")
-            sendMessage(session, TextMessage("PONG"))
-        }
+        LOG.info("Новое подключение: id=${session.id}, всего активных: ${sessions.size}")
     }
 
     override fun afterConnectionClosed(
@@ -59,7 +43,7 @@ class NotificationWebSocketHandler : TextWebSocketHandler() {
     fun broadcast(message: String): Int {
         val textMessage = TextMessage(message)
 
-        val countSent = sessions.values.fold(initial = 0) { acc, session ->
+        val countSent = sessions.fold(initial = 0) { acc, session ->
             acc + (1.takeIf { sendMessage(session, textMessage).isSuccess } ?: 0)
         }
 
@@ -68,17 +52,10 @@ class NotificationWebSocketHandler : TextWebSocketHandler() {
         return countSent
     }
 
-    fun sentByUserId(userId: String, message: String): Result<Unit> = runCatching {
-        val textMessage = TextMessage(message)
-        val session = requireNotNull(sessions[userId])
-
-        sendMessage(session, textMessage)
-    }
-
     private fun sendMessage(session: WebSocketSession, message: TextMessage) = runCatching {
         check(session.isOpen) { "Session is closed" }
 
-        session.sendMessage(message)
+        synchronized(session) { session.sendMessage(message) }
     }.onFailure { exception ->
         LOG.warn("Ошибка отправки в сессию ${session.id}: ${exception.message}")
 
@@ -86,13 +63,11 @@ class NotificationWebSocketHandler : TextWebSocketHandler() {
     }
 
     private fun removeSession(session: WebSocketSession) {
-        if (sessions.containsValue(session)) {
-            sessions.remove(sessions.filterValues { it == session }.keys.first())
-        }
+        sessions.remove(session)
     }
 
     companion object {
 
-        private val LOG = LoggerFactory.getLogger(NotificationWebSocketHandler::class.java)
+        private val LOG = LoggerFactory.getLogger(NotificationHandler::class.java)
     }
 }

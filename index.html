@@ -1,158 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>WebSocket demo</title>
+    <title>Система уведомлений RUT-MIIT</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        #messages { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; }
-        .log { color: gray; font-size: 0.8em; }
-        .msg { color: blue; font-weight: bold; }
-        .ping { color: green; font-style: italic; }
-        #user-info {
-            background-color: #f0f0f0;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            border-left: 4px solid #007bff;
-        }
-        .user-id {
-            font-weight: bold;
-            color: #007bff;
-            font-family: monospace;
-            font-size: 1.1em;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        #status { text-align: center; margin-bottom: 20px; font-weight: bold; color: #dc3545; }
+        .notification { padding: 15px; margin-bottom: 10px; border-left: 5px solid; border-radius: 4px; animation: slideIn 0.5s ease-out; }
+        .verdict-GOOD { background-color: #d4edda; border-color: #28a745; color: #155724; }
+        .verdict-BAD { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
-<h2>Live Notifications</h2>
-<div id="user-info">
-    User ID: <span id="userIdDisplay" class="user-id"></span>
+<div class="container">
+    <h2>Центр уведомлений</h2>
+    <div id="status">Отключено</div>
+    <div id="notifications-area"></div>
 </div>
-<div id="status">Status: Disconnected</div>
-<div id="messages"></div>
 
 <script>
     const statusDiv = document.getElementById('status');
-    const messagesDiv = document.getElementById('messages');
-    const userIdDisplay = document.getElementById('userIdDisplay');
-
-    let socket = null;
-    let reconnectAttempts = 0;
-    let reconnectTimer = null;
-    let pingInterval = null;
-    const MAX_RECONNECT_DELAY = 30000; // макс. 30 сек между попытками
-    const PING_INTERVAL = 10000; // 10 секунд для PING
-    let userId = ''; // Добавляем переменную для хранения userId
-
-    // Функция для генерации случайного userId (8 символов)
-    function generateUserId() {
-        // Используем случайные символы из букв и цифр
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let result = '';
-        for (let i = 0; i < 8; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
-    }
-
-    userId = generateUserId();
-    userIdDisplay.textContent = userId;
+    const area = document.getElementById('notifications-area');
+    let socket;
 
     function connect() {
-        // Защита от повторного вызова
-        if (socket && socket.readyState === WebSocket.CONNECTING) {
-            return;
-        }
+        // Подключение к нашему новому сервису
+        socket = new WebSocket('ws://localhost:8083/ws/notifications');
 
-        // Очищаем предыдущий таймер
-        if (reconnectTimer) {
-            clearTimeout(reconnectTimer);
-            reconnectTimer = null;
-        }
-
-        // ws:// для http, wss:// для https (продакшен)
-        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        // Добавляем userId как параметр запроса (опционально)
-        socket = new WebSocket(`${protocol}//localhost:8080/ws/notifications?userId=${userId}`);
-
-        socket.onopen = function() {
-            reconnectAttempts = 0; // сброс счетчика при успешном подключении
-            statusDiv.textContent = 'Status: Connected';
-            statusDiv.style.color = 'green';
-            log(`Соединение установлено для User ID: ${userId}`);
-
-            // Запускаем PING интервал при успешном подключении
-            startPingInterval();
+        socket.onopen = () => {
+            statusDiv.innerText = 'Подключено к системе событий';
+            statusDiv.style.color = '#28a745';
         };
 
-        socket.onmessage = function(event) {
-            // Проверяем, является ли сообщение ответом на PING
-            if (event.data === 'PONG') {
-                log('Получено: PONG (ответ на PING)', 'ping');
-            } else {
-                log('Получено: ' + event.data, 'msg');
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log("Получено событие:", data);
+
+            if (data.type === 'RATING_UPDATE') {
+                showNotification(data);
             }
         };
 
-        socket.onclose = function(event) {
-            statusDiv.textContent = 'Status: Disconnected';
-            statusDiv.style.color = 'red';
-
-            // Останавливаем PING интервал при разрыве соединения
-            stopPingInterval();
-
-            const reason = event.wasClean
-                ? `закрыто чисто, код=${event.code}`
-                : 'обрыв соединения';
-            log(`Отключение: ${reason} (User ID: ${userId})`);
-
-            scheduleReconnect();
-        };
-
-        socket.onerror = function() {
-            // WebSocket error event не содержит деталей (по соображениям безопасности)
-            log('Ошибка соединения');
+        socket.onclose = () => {
+            statusDiv.innerText = 'Соединение разорвано. Переподключение...';
+            statusDiv.style.color = '#dc3545';
+            setTimeout(connect, 3000);
         };
     }
 
-    function scheduleReconnect() {
-        // Exponential backoff: 1s, 2s, 4s, 8s... до MAX_RECONNECT_DELAY
-        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), MAX_RECONNECT_DELAY);
-        reconnectAttempts++;
-        log(`Переподключение через ${delay/1000} сек (попытка ${reconnectAttempts}) для User ID: ${userId}...`);
-        reconnectTimer = setTimeout(connect, delay);
-    }
-
-    function startPingInterval() {
-        // Очищаем предыдущий интервал, если он существует
-        stopPingInterval();
-
-        // Создаем новый интервал для отправки PING
-        pingInterval = setInterval(() => {
-            if (socket && socket.readyState === WebSocket.OPEN) {
-                socket.send(`PING`);
-                log('Отправлено: PING', 'ping');
-            }
-        }, PING_INTERVAL);
-    }
-
-    function stopPingInterval() {
-        if (pingInterval) {
-            clearInterval(pingInterval);
-            pingInterval = null;
-        }
-    }
-
-    function log(text, type = 'log') {
+    function showNotification(data) {
         const div = document.createElement('div');
-        div.className = type;
-        div.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
-        messagesDiv.appendChild(div);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        div.className = `notification verdict-${data.verdict}`;
+        div.innerHTML = `
+            <strong>ID Рабочего: ${data.workerId}</strong><br>
+            Рейтинг рассчитан: <b>${data.score}</b><br>
+            Вердикт: ${data.verdict}
+        `;
+        area.prepend(div);
     }
 
-    // Запуск
     connect();
 </script>
 </body>
