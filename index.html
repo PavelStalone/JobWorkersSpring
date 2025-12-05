@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket demo</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #messages { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; }
+        .log { color: gray; font-size: 0.8em; }
+        .msg { color: blue; font-weight: bold; }
+        .ping { color: green; font-style: italic; }
+        #user-info {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #007bff;
+        }
+        .user-id {
+            font-weight: bold;
+            color: #007bff;
+            font-family: monospace;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+<h2>Live Notifications</h2>
+<div id="user-info">
+    User ID: <span id="userIdDisplay" class="user-id"></span>
+</div>
+<div id="status">Status: Disconnected</div>
+<div id="messages"></div>
+
+<script>
+    const statusDiv = document.getElementById('status');
+    const messagesDiv = document.getElementById('messages');
+    const userIdDisplay = document.getElementById('userIdDisplay');
+
+    let socket = null;
+    let reconnectAttempts = 0;
+    let reconnectTimer = null;
+    let pingInterval = null;
+    const MAX_RECONNECT_DELAY = 30000; // макс. 30 сек между попытками
+    const PING_INTERVAL = 10000; // 10 секунд для PING
+    let userId = ''; // Добавляем переменную для хранения userId
+
+    // Функция для генерации случайного userId (8 символов)
+    function generateUserId() {
+        // Используем случайные символы из букв и цифр
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < 8; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    userId = generateUserId();
+    userIdDisplay.textContent = userId;
+
+    function connect() {
+        // Защита от повторного вызова
+        if (socket && socket.readyState === WebSocket.CONNECTING) {
+            return;
+        }
+
+        // Очищаем предыдущий таймер
+        if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+        }
+
+        // ws:// для http, wss:// для https (продакшен)
+        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        // Добавляем userId как параметр запроса (опционально)
+        socket = new WebSocket(`${protocol}//localhost:8080/ws/notifications?userId=${userId}`);
+
+        socket.onopen = function() {
+            reconnectAttempts = 0; // сброс счетчика при успешном подключении
+            statusDiv.textContent = 'Status: Connected';
+            statusDiv.style.color = 'green';
+            log(`Соединение установлено для User ID: ${userId}`);
+
+            // Запускаем PING интервал при успешном подключении
+            startPingInterval();
+        };
+
+        socket.onmessage = function(event) {
+            // Проверяем, является ли сообщение ответом на PING
+            if (event.data === 'PONG') {
+                log('Получено: PONG (ответ на PING)', 'ping');
+            } else {
+                log('Получено: ' + event.data, 'msg');
+            }
+        };
+
+        socket.onclose = function(event) {
+            statusDiv.textContent = 'Status: Disconnected';
+            statusDiv.style.color = 'red';
+
+            // Останавливаем PING интервал при разрыве соединения
+            stopPingInterval();
+
+            const reason = event.wasClean
+                ? `закрыто чисто, код=${event.code}`
+                : 'обрыв соединения';
+            log(`Отключение: ${reason} (User ID: ${userId})`);
+
+            scheduleReconnect();
+        };
+
+        socket.onerror = function() {
+            // WebSocket error event не содержит деталей (по соображениям безопасности)
+            log('Ошибка соединения');
+        };
+    }
+
+    function scheduleReconnect() {
+        // Exponential backoff: 1s, 2s, 4s, 8s... до MAX_RECONNECT_DELAY
+        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), MAX_RECONNECT_DELAY);
+        reconnectAttempts++;
+        log(`Переподключение через ${delay/1000} сек (попытка ${reconnectAttempts}) для User ID: ${userId}...`);
+        reconnectTimer = setTimeout(connect, delay);
+    }
+
+    function startPingInterval() {
+        // Очищаем предыдущий интервал, если он существует
+        stopPingInterval();
+
+        // Создаем новый интервал для отправки PING
+        pingInterval = setInterval(() => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(`PING`);
+                log('Отправлено: PING', 'ping');
+            }
+        }, PING_INTERVAL);
+    }
+
+    function stopPingInterval() {
+        if (pingInterval) {
+            clearInterval(pingInterval);
+            pingInterval = null;
+        }
+    }
+
+    function log(text, type = 'log') {
+        const div = document.createElement('div');
+        div.className = type;
+        div.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // Запуск
+    connect();
+</script>
+</body>
+</html>
