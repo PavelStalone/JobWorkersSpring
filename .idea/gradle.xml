@@ -11,9 +11,12 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/api" />
             <option value="$PROJECT_DIR$/event" />
+            <option value="$PROJECT_DIR$/grpc" />
             <option value="$PROJECT_DIR$/service" />
+            <option value="$PROJECT_DIR$/service/analytic" />
             <option value="$PROJECT_DIR$/service/audit" />
             <option value="$PROJECT_DIR$/service/main" />
+            <option value="$PROJECT_DIR$/service/notification" />
           </set>
         </option>
       </GradleProjectSettings>

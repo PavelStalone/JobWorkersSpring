@@ -24,7 +24,7 @@ class RabbitMQConfig {
         setAllowedListPatterns(listOf("org.example.event.*"))
     }
 
-    @Bean
+//    @Bean
     fun rabbitTemplate(
         connectionFactory: ConnectionFactory,
         simpleMessageConverter: SimpleMessageConverter

@@ -1,10 +1,10 @@
 package org.example.service.analytic
 
 import io.grpc.stub.StreamObserver
+import net.devh.boot.grpc.server.service.GrpcService
 import org.example.grpc.AnalyticsServiceGrpc
 import org.example.grpc.WorkerRatingRequest
 import org.example.grpc.WorkerRatingResponse
-import org.springframework.grpc.server.service.GrpcService
 import java.lang.Math.random
 
 @GrpcService

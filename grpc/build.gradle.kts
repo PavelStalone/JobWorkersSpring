@@ -8,7 +8,7 @@ plugins {
 
     id("org.springframework.boot") version "3.5.6"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.google.protobuf") version "0.9.4"
+    id("com.google.protobuf") version "0.9.5"
 }
 
 group = "org.example.grpc"
@@ -29,28 +29,21 @@ kotlin {
     jvmToolchain(17)
 }
 
-extra["springGrpcVersion"] = "0.12.0"
-
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-    api("io.grpc:grpc-services")
-    api("org.springframework.grpc:spring-grpc-spring-boot-starter")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.grpc:spring-grpc-dependencies:${property("springGrpcVersion")}")
-    }
+    runtimeOnly("io.grpc:grpc-netty-shaded:1.77.0")
+    api("io.grpc:grpc-protobuf:1.77.0")
+    api("io.grpc:grpc-stub:1.77.0")
 }
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc"
+        artifact = "com.google.protobuf:protoc:3.25.8"
     }
     plugins {
         id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.77.0"
         }
     }
     generateProtoTasks {

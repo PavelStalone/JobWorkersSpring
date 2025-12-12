@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils
 import java.util.*
 
-@Component
-@Order(1)
+//@Component
+//@Order(1)
 class LoggingAndTracingFilter : Filter {
 
     override fun doFilter(

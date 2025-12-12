@@ -1,5 +1,6 @@
 package org.example.service.main.contorller
 
+import net.devh.boot.grpc.client.inject.GrpcClient
 import org.example.api.RatingApi
 import org.example.event.RabbitMQ
 import org.example.event.WorkerEvent
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class RatingController(
-    private val analyticStub: AnalyticsServiceGrpc.AnalyticsServiceBlockingStub,
+    @GrpcClient("analytics-service") private val analyticStub: AnalyticsServiceGrpc.AnalyticsServiceBlockingStub,
     private val rabbitTemplate: RabbitTemplate,
 ) : RatingApi {
 
