@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class RatingController(
-    @GrpcClient("analytics-service") private val analyticStub: AnalyticsServiceGrpc.AnalyticsServiceBlockingStub,
     private val rabbitTemplate: RabbitTemplate,
 ) : RatingApi {
+
+    @GrpcClient("analytics-service")
+    private lateinit var analyticStub: AnalyticsServiceGrpc.AnalyticsServiceBlockingStub
 
     override fun rateWorker(id: Long): String {
         val request = WorkerRatingRequest.newBuilder()
