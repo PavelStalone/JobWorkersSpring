@@ -1,5 +1,2 @@
-FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
-
-COPY /build/libs/*.jar app.jar
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+FROM eclipse-temurin:17-jre-alpine
+ENTRYPOINT ["java", "-jar", "notification/app.jar"]

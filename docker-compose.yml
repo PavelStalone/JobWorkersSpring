@@ -1,6 +1,11 @@
 version: "3.8"
 
 services:
+  builder:
+    build: .
+    volumes:
+      - jars:/artifact
+
   # Инфраструктура: Брокер сообщений
   rabbitmq:
     image: rabbitmq:3.13-management
@@ -38,9 +43,14 @@ services:
     build: ./service/analytic
     ports:
       - "9091:9090" # gRPC порт
+    volumes:
+      - jars:/artifact
+    working_dir: /artifact
     environment:
       - SPRING_RABBITMQ_HOST=rabbitmq
     depends_on:
+      builder:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
     networks:
@@ -53,7 +63,12 @@ services:
     environment:
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SERVER_PORT=8083
+    volumes:
+      - jars:/artifact
+    working_dir: /artifact
     depends_on:
+      builder:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
     networks:
@@ -64,7 +79,12 @@ services:
     environment:
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SERVER_PORT=8082
+    volumes:
+      - jars:/artifact
+    working_dir: /artifact
     depends_on:
+      builder:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
     networks:
@@ -78,7 +98,12 @@ services:
       - SPRING_RABBITMQ_HOST=rabbitmq
       # Указываем адрес gRPC сервиса внутри сети Docker
       - GRPC_CLIENT_ANALYTICS_SERVICE_ADDRESS=static://analytics-service:9090
+    volumes:
+      - jars:/artifact
+    working_dir: /artifact
     depends_on:
+      builder:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
       analytics-service:
@@ -89,3 +114,6 @@ services:
 networks:
   microservices-net:
     driver: bridge
+
+volumes:
+  jars:
