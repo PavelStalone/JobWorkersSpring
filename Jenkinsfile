@@ -2,6 +2,11 @@ pipeline {
     agent any
 
     stages {
+        stage('Setup') {
+            steps {
+                sh 'chmod +x gradlew gradlew.bat'
+            }
+        }
         stage('Hello') {
             steps {
                 echo 'Hello World from project'
