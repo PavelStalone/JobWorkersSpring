@@ -22,6 +22,8 @@ pipeline {
         }
         stage('deploy') {
             steps {
+                sh 'ls -la'
+                sh 'ls ./ -la'
                 sh 'docker-compose up -d'
             }
         }
