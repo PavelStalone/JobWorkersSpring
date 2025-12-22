@@ -7,14 +7,11 @@ pipeline {
     }
 
     stages {
-//         stage('Setup') {
-//             steps {
-//                 sh 'chmod +x gradlew gradlew.bat docker-compose*'
-//                 sh 'docker images'
-//                 sh 'docker container ls -a'
-// //                 sh './gradlew build'
-//             }
-//         }
+        stage('Setup') {
+            steps {
+                sh 'chmod +x gradlew gradlew.bat docker-compose*'
+            }
+        }
         stage('build') {
             steps {
                 sh 'docker-compose build --progress=plain'
