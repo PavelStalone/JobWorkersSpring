@@ -20,7 +20,6 @@ services:
       - "8888:8080"
     environment:
       - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
-      - DOCKER_HOST=unix:///var/run/docker.sock
     networks:
       - jenkins-network
     volumes:
