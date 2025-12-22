@@ -27,6 +27,10 @@ pipeline {
                     echo "=== 2. Тип вашего файла ==="
                     ls -l prometheus.yml
                 '''
+                sh '''
+                    FULL_PATH=$(realpath $(pwd)/prometheus.yml)
+                    sed -i "s|./prometheus.yml:/etc/prometheus/prometheus.yml|$FULL_PATH:/etc/prometheus/prometheus.yml:ro|g" docker-compose.yml
+                '''
                 sh 'docker-compose up -d'
             }
         }
