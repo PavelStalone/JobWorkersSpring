@@ -2,17 +2,12 @@ pipeline {
     agent any
 
     stages {
-        stage('Setup') {
-            steps {
-                sh 'chmod +x gradlew gradlew.bat'
-            }
-        }
-        stage('Hello') {
-            steps {
-                echo 'Hello World from project'
-                sh './gradlew clean'
-            }
-        }
+//         stage('Setup') {
+//             steps {
+//                 sh 'chmod +x gradlew gradlew.bat'
+//                 sh './gradlew build'
+//             }
+//         }
         stage('build') {
             steps {
                 sh 'docker-compose build --progress=plain'
