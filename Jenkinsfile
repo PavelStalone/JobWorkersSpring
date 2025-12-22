@@ -1,21 +1,20 @@
 pipeline {
-    agent any
-//      {
-//         docker {
-//             image 'docker:27.1-dind'
-//             args '-v /var/run/docker.sock:/var/run/docker.sock --privileged --security-opt apparmor:unconfined --security-opt seccomp:unconfined'
-//         }
-//     }
+    agent {
+        docker {
+            image 'docker:27.1-dind'
+            args '-v /var/run/docker.sock:/var/run/docker.sock --privileged'
+        }
+    }
 
     stages {
-        stage('Setup') {
-            steps {
-                sh 'chmod +x gradlew gradlew.bat docker-compose*'
-                sh 'docker images'
-                sh 'docker container ls -a'
-//                 sh './gradlew build'
-            }
-        }
+//         stage('Setup') {
+//             steps {
+//                 sh 'chmod +x gradlew gradlew.bat docker-compose*'
+//                 sh 'docker images'
+//                 sh 'docker container ls -a'
+// //                 sh './gradlew build'
+//             }
+//         }
         stage('build') {
             steps {
                 sh 'docker-compose build --progress=plain'

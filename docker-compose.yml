@@ -30,9 +30,7 @@ services:
 
   # Инфраструктура: Метрики
   prometheus:
-    image: prom/prometheus
-    volumes:
-      - ./prometheus:/etc/prometheus
+    build: ./prometheus
     ports:
       - "9090:9090"
     networks:
