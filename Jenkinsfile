@@ -27,32 +27,7 @@ pipeline {
                     echo "=== 2. Тип вашего файла ==="
                     ls -l prometheus.yml
                 '''
-                sh '''
-                    # 1. ВРЕМЕННО отключаем volume для prometheus
-                    sed -i "/prometheus:/,/ports:/s/volumes:// volumes: #отключено/g" docker-compose.yml
-
-                    cat docker-compose.yml
-
-                    # 2. Запускаем ВСЕ сервисы
-                    docker-compose up -d
-
-                    # 3. Копируем файл В Prometheus
-                    PROM_POD=$(docker-compose ps -q prometheus)
-                    docker cp prometheus.yml $PROM_POD:/etc/prometheus/prometheus.yml
-
-                    # 4. Рестарт только Prometheus
-                    docker-compose restart prometheus
-
-                    # 5. Возвращаем docker-compose.yml в исходное состояние
-                    sed -i "/prometheus:/,/ports:/s:// volumes: #отключено/volumes:/g" docker-compose.yml
-
-                    cat docker-compose.yml
-
-                    echo "=== ПРОВЕРКА ==="
-                    docker-compose ps
-                    curl -f http://localhost:9090/-/ready || echo "Prometheus готовится..."
-                '''
-//                 sh 'docker-compose up -d'
+                sh 'docker-compose up -d'
             }
         }
     }
