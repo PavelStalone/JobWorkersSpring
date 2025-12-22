@@ -25,11 +25,9 @@ pipeline {
                 sh 'ls -la'
                 sh 'pwd'
                 sh '''
+                    chmod 644 prometheus.yml
                     echo "=== Исследуем файл ==="
                     ls -la prometheus.yml
-                    file prometheus.yml
-                    stat prometheus.yml
-                    hexdump -C prometheus.yml | head -5
                 '''
                 sh 'docker-compose up -d'
             }
