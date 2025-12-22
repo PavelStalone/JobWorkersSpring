@@ -23,7 +23,14 @@ pipeline {
         stage('deploy') {
             steps {
                 sh 'ls -la'
-                sh 'ls ./ -la'
+                sh 'pwd'
+                sh '''
+                    echo "=== Исследуем файл ==="
+                    ls -la prometheus.yml
+                    file prometheus.yml
+                    stat prometheus.yml
+                    hexdump -C prometheus.yml | head -5
+                '''
                 sh 'docker-compose up -d'
             }
         }
