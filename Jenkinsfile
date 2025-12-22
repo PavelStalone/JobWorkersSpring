@@ -22,11 +22,6 @@ pipeline {
         }
         stage('deploy') {
             steps {
-                sh '''
-                    chmod 777 prometheus.yml
-                    echo "=== 2. Тип вашего файла ==="
-                    ls -l prometheus.yml
-                '''
                 sh 'docker-compose up -d'
             }
         }
